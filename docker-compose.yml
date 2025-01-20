@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  traccar:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Ruta del Dockerfile
+    container_name: traccar
+    ports:
+      - "8082:8082"  # Mapea el puerto 8082 del contenedor al host
+    volumes:
+      - .:/app  # Monta el directorio local al contenedor para que el archivo .jar y el instalador estén disponibles
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+    command: >
+      bash -c "
+      chmod +x /app/traccar-linux-64-6.5/traccar.run &&
+      /app/traccar-linux-64-6.5/traccar.run &&
+      cp -f /app/tracker-server.jar /opt/traccar/ &&
+      systemctl restart traccar &&
+      tail -f /dev/null
+      "
+    restart: unless-stopped  # Asegura que el contenedor se reinicie si falla
